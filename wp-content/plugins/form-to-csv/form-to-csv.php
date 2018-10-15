@@ -1,199 +1,152 @@
 <?php
-
 /*
-Plugin Name: Form to CSV
-Plugin URI: 
-Description: Get subscribers in a CSV file.
-Version: 1.0
-Author:
-Author URI:
-License: 
-License URI:
-Text Domain: form-to-csv
+    Plugin Name: Form to CSV
+    Version: 1.0
+    Author: Grégory Huyghe
 */
 
 
-/* 1. HOOKS */
 
-// 1.1: register shortcode on init
-add_action ('init', 'ftc_register_shortcodes');
-
-// 1.2: register custom admin column header
-add_filter ('manage_edit-ftc_subscriber_columns', 'ftc_subscriber_column_headers');
-add_filter ('manage_edit-ftc_list_columns', 'ftc_list_column_headers');
-
-// 1.3: register custom admin column data
-add_filter ('manage_ftc_subscriber_posts_custom_column', 'ftc_subscriber_column_data', 1, 2);
-add_action ('admin_head-edit.php', 'ftc_register_custom_admin_titles');
-add_filter ('manage_ftc_list_posts_custom_column', 'ftc_list_column_data', 1, 2);
-
-
-/* 2. SHORTCODES */
-
-// 2.1: register shortcode
-function ftc_register_shortcodes() {
+// 1. Code HTML du formulaire d'inscription
+function htmlCode () {
+?> 
+<form action="" method="post">
+    <label for="prenom">Prénom</label>
+    <input class="main-content__form--input" pattern="[a-zA-Z0-9 ]+" id="prenom" type="text" name="prenom" required>
     
-    add_shortcode('ftc_form', 'ftc_form_shortcode');
-}
-
-// 2.2: returns a html string for an email form
-function ftc_form_shortcode($args, $content="") {
+    <label for="nom">Nom</label>
+    <input class="main-content__form--input" pattern="[a-zA-Z0-9 ]+" id="nom" type="text" name="nom" required>
     
-    //get the list id
-    $list_id = 0;
-    if (isset($args['id'])) {
-        $list_id = (int)$args['id'];
-    }
+    <label for="email">Email</label>
+    <input class="main-content__form--input" id="email" type="email" name="email" required>
     
-    // setup our output variable - the form html
-    $output = '
-    
-        <div class="ftc">
-            <form id="ftc_form" name="ftc_form" class="ftc-form" method="post" action="/wp-admin/admin-ajax.php?action=ftc_save_subscription" method="post">
-            
-            <input type="hidden" name="ftc_list" value="'. $list_id .'">
-            
-                <p class="ftc-input-container">
-                    <label>Your Name</label>
-                    <input type="text" name="ftc_fname" placeholder="First Name">
-                    <input type="text" name="ftc_lname" placeholder="Last Name">
-                </p>
-                
-                <p class="ftc-input-container">
-                    <label>Your Email</label>
-                    <input type="email" name="ftc_email" placeholder="your@email.com">           
-                </p>';
+    <fieldset class="main-content__form--checkbox">
+        <legend class="main-content__form--legend">Sélection des films</legend>
         
-                // including content in the form html if content is passed into the function
-                if(strlen($content)) {
-                    
-                    $output .= '<div class="ftc-content>' . wpautop($content) . '</div>';
-                
-                }    
-                
-                // completing the form html
-                $output .= '<p class="ftc-input-container">
-                    <input type="submit" name="ftc_submit" value="Sign Me Up!">    
-                </p>
-            </form>
-        </div>
+        <input type="checkbox" id="laHaine" name="films" value="La Haine">
+        <label for="laHaine">La Haine</label>
+        
+        <input type="checkbox" id="odyssee" name="films" value="l'Odyssée de l'espace">
+        <label for="odyssee">l'Odyssée de l'espace</label>
+        
+        <input type="checkbox" id="requiem" name="films" value="Requiem for a dream">
+        <label for="requiem">Requiem for a dream</label>
+        
+        <input type="checkbox" id="mulholland" name="films" value="Mulholland Drive">
+        <label for="mulholland">Mulholland Drive</label>
+        
+        <input type="checkbox" id="Carnage" name="films" value="Carnage">
+        <label for="Carnage">Carnage</label>
+        
+        <input type="checkbox" id="under" name="films" value="Under the skin">
+        <label for="under">Under the skin</label>
+        
+        <input type="checkbox" id="edward" name="films" value="Edward aux mains d'argent">
+        <label for="edward">Edward aux mains d'argent</label>
+        
+        <input type="checkbox" id="lost" name="films" value="Lost in translation">
+        <label for="lost">Lost in translation</label>
+    </fieldset>
+
+    <input class="main-content__form--input" type="submit" value="S'inscrire">
+</form>
+ 
+<?php   
+ 
+}    
     
-    ';
-    
-    return $output;
+// 2. Récupérer ses infos dans un custom post accessible depuis le panneau admin. Pas d'envoi de mail. Envoi données vers DB
+$prenom = $_POST['prenom'];
+$nom = $_POST['nom'];
+$email = $_POST['email'];
+
+function insertuser( $prenom, $nom, $email ) {
+  global $wpdb;
+
+  $table_name = $wpdb->prefix . 'inscription';
+  $wpdb->insert( $table_name, array(
+    'prenom' => $prenom,
+    'nom' =>$nom,
+    'email' => $email
+  ) );
 }
 
+insertuser( $prenom, $nom, $email );
 
-/* 3. FILTERS */
 
-// 3.1
-function ftc_subscriber_column_headers ($columns) {
-    // creating custom column header data
-    $columns = array (
-        'cb' => '<input type="checkbox">',
-        'title' =>__('Subscriber Name'),
-        'email' =>__('Email Address'),
-    );
+
+// 3. Pouvoir extraire ses infos dans un fichier .csv depuis le panneau admin. Requête DB
     
-    return $columns;
+    
+    
+    
+    
+// THE FORM  
+function html_form_code() {
+    
+    echo '<form action="' . esc_url( $_SERVER['REQUEST_URI'] ) . '" method="post">';
+    
+    echo '<p>';
+    echo 'Your Name (required) <br />';
+    echo '<input type="text" name="cf-name" pattern="[a-zA-Z0-9 ]+" value="' . ( isset( $_POST["cf-name"] ) ? esc_attr( $_POST["cf-name"] ) : '' ) . '" size="40" />';
+    echo '</p>';
+    
+    echo '<p>';
+    echo 'Your Email (required) <br />';
+    echo '<input type="email" name="cf-email" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,3}$" value="' . ( isset( $_POST["cf-email"] ) ? esc_attr( $_POST["cf-email"] ) : '' ) . '" size="40" />';
+    echo '</p>';
+    
+    echo '<p>';
+    echo 'Subject (required) <br />';
+    echo '<input type="text" name="cf-subject" pattern="[a-zA-Z ]+" value="' . ( isset( $_POST["cf-subject"] ) ? esc_attr( $_POST["cf-subject"] ) : '' ) . '" size="40" />';
+    echo '</p>';
+    
+    echo '<p>';
+    echo 'Your Message (required) <br />';
+    echo '<textarea rows="10" cols="35" name="cf-message">' . ( isset( $_POST["cf-message"] ) ? esc_attr( $_POST["cf-message"] ) : '' ) . '</textarea>';
+    echo '</p>';
+    
+    echo '<p><input type="submit" name="cf-submitted" value="Send"/></p>';
+    echo '</form>';
 }
 
-//3.2
-function ftc_subscriber_column_data ($column, $post_id) {
-    
-    $output = '';
-    
-    switch ($column) {
-            
-        case 'title':
-            $fname = get_field('ftc_fname', $post_id);
-            $lname = get_field('ftc_lname', $post_id);
-            $output .= $fname .' '. $lname;    
-            break;
-        case 'email':
-            $email = get_field('ftc_email', $post_id);
-            $output .= $email;    
-            break;
-    }
-    
-    echo $output;
-}
+// SEND THE FORM DATA TO ADMIN EMAIL ADDRESS
+function deliver_mail() {
 
-//3.2.2: special custom admin title columns
-function ftc_register_custom_admin_titles() {
-    add_filter (
-        'the_title',
-        'ftc_custom_admin_titles',
-        99,
-        2
-    );
-}
+    // if the submit button is clicked, send the email
+    if ( isset( $_POST['cf-submitted'] ) ) {
 
-//3.3.3: handles custom admin title "title" column data for post types without title
-function ftc_custom_admin_titles ($title, $post_id) {
-    global $post;
-    
-    $output = $title;
-    
-    if (isset($post->post_type)) {
-        switch ($post->post_type) {
-            case 'ftc_subscriber':
-                $fname = get_field('ftc_fname', $post_id);
-                $lname = get_field('ftc_lname', $post_id);
-                $output = $fname .' '. $lname;    
-                break;
+        // sanitize form values
+        $name    = sanitize_text_field( $_POST["cf-name"] );
+        $email   = sanitize_email( $_POST["cf-email"] );
+        $subject = sanitize_text_field( $_POST["cf-subject"] );
+        $message = esc_textarea( $_POST["cf-message"] );
+
+        // get the blog administrator's email address
+        $to = get_option( 'admin_email' );
+
+        $headers = "From: $name <$email>" . "\r\n";
+
+        // If email has been process for sending, display a success message
+        if ( wp_mail( $to, $subject, $message, $headers ) ) {
+            echo '<div>';
+            echo '<p>Thanks for contacting me, expect a response soon.</p>';
+            echo '</div>';
+        } else {
+            echo 'An unexpected error occurred';
         }
     }
-    
-    return $output;
 }
 
-// 3.3
-function ftc_list_column_headers ($columns) {
-    // creating custom column header data
-    $columns = array (
-        'cb' => '<input type="checkbox">',
-        'title' =>__('List Name'),
-    );
-    
-    return $columns;
+// SHORTCODE TO DISPLAY FORM ON WEBSITE
+function cf_shortcode() {
+    ob_start();
+    deliver_mail();
+    html_form_code();
+
+    return ob_get_clean();
 }
 
-//3.4
-function ftc_list_column_data ($column, $post_id) {
-    
-    $output = '';
-    
-    switch ($column) {
-            
-        case 'example':
-//            $fname = get_field('ftc_fname', $post_id);
-//            $lname = get_field('ftc_lname', $post_id);
-//            $output .= $fname .' '. $lname;    
-            break;
-    }
-    
-    echo $output;
-}
-
-
-
-/* 4. EXTERNAL SCRIPTS */
-
-/* 5. ACTIONS */
-
-//5.1 saves subscription data to an existing or new subscriber
-
-/* 6. HELPERS */
-
-/* 7. CUSTOM POST TYPES */
-
-/* 8. ADMIN PAGES */
-
-/* 9. SETTINGS */
-
-
-
-
+add_shortcode( 'form_csv', 'cf_shortcode' );
 
 ?>
