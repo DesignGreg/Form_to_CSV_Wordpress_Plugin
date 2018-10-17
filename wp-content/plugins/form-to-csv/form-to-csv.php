@@ -9,50 +9,7 @@
 
 // 1. Code HTML du formulaire d'inscription
 function ftc_htmlCode () {
-?> 
-<form action="" method="post">
-    <label for="prenom">Prénom</label>
-    <input class="main-content__form--input" pattern="[a-zA-Z0-9 ]+" id="prenom" type="text" name="prenom" required>
-    
-    <label for="nom">Nom</label>
-    <input class="main-content__form--input" pattern="[a-zA-Z0-9 ]+" id="nom" type="text" name="nom" required>
-    
-    <label for="email">Email</label>
-    <input class="main-content__form--input" id="email" type="email" name="email" required>
-    
-    <fieldset class="main-content__form--checkbox">
-        <legend class="main-content__form--legend">Sélection des films</legend>
-        
-        <input type="checkbox" id="laHaine" name="films" value="La Haine">
-        <label for="laHaine">La Haine</label>
-        
-        <input type="checkbox" id="odyssee" name="films" value="l'Odyssée de l'espace">
-        <label for="odyssee">l'Odyssée de l'espace</label>
-        
-        <input type="checkbox" id="requiem" name="films" value="Requiem for a dream">
-        <label for="requiem">Requiem for a dream</label>
-        
-        <input type="checkbox" id="mulholland" name="films" value="Mulholland Drive">
-        <label for="mulholland">Mulholland Drive</label>
-        
-        <input type="checkbox" id="Carnage" name="films" value="Carnage">
-        <label for="Carnage">Carnage</label>
-        
-        <input type="checkbox" id="under" name="films" value="Under the skin">
-        <label for="under">Under the skin</label>
-        
-        <input type="checkbox" id="edward" name="films" value="Edward aux mains d'argent">
-        <label for="edward">Edward aux mains d'argent</label>
-        
-        <input type="checkbox" id="lost" name="films" value="Lost in translation">
-        <label for="lost">Lost in translation</label>
-    </fieldset>
-
-    <input class="main-content__form--input" type="submit" value="S'inscrire">
-</form>
- 
-<?php   
- 
+    readfile("form-to-csv.html", 1);
 }
 
 
@@ -64,14 +21,14 @@ function ftc_shortcode() {
 add_shortcode( 'form_csv', 'ftc_shortcode' );
 
 
-// 3. Menu Admin pour voir données collectées
+// 3. Onglet plugin dans panneau admin pour voir et télécharger les données collectées
 function ftc_menu_item() {
     add_menu_page(
         __( 'Form to CSV', 'textdomain' ),
         'Form to CSV',
         'manage_options',
-        'custom_menu_page',
-        '',
+        'form-to-csv',
+        'menu_plugin',
         'dashicons-portfolio',
         21
     );
@@ -79,26 +36,89 @@ function ftc_menu_item() {
 
 add_action('admin_menu', 'ftc_menu_item');
 
-    
-// 4. Récupérer ses infos dans un custom post accessible depuis le panneau admin. Pas d'envoi de mail. Envoi données vers DB
-$prenom = $_POST['prenom'];
-$nom = $_POST['nom'];
-$email = $_POST['email'];
 
-function insertuser( $prenom, $nom, $email ) {
-  global $wpdb;
+// 4. Ecrire les données dans un fichier
 
-  $table_name = $wpdb->prefix . 'inscription';
-  $wpdb->insert( $table_name, array(
-    'prenom' => $prenom,
-    'nom' =>$nom,
-    'email' => $email
-  ) );
+// 4.1 Variables
+$error = '';
+$fname = sanitize_text_field($_POST['prenom']);
+$lname = sanitize_text_field($_POST['nom']);
+$email = sanitize_email($_POST['email']);
+$checkbox = $_POST['films'];
+
+// 4.2 Clean_text
+function clean_text($clean) {
+    $clean = trim($clean);
+    $clean = stripslashes($clean);
+    $clean = htmlspecialchars($clean);
+    return $clean;
 }
 
-insertuser( $prenom, $nom, $email );
+// 4.3 Soumission form
+if(isset($_POST['submit'])) {
+    
+    if(!empty($_POST['prenom']) && !empty($_POST['nom']) && !empty($_POST['email'])) {
+        
+        $fname = clean_text($_POST['prenom']);
+        $lname = clean_text($_POST['nom']);
+        $email = clean_text($_POST['email']);
+        
+        // Ecriture dans fichier csv
+        $file_open = fopen('../form-to-csv.csv', 'a');
+        $no_rows = count(file('form-to-csv.csv'));
+        
+        if ($no_rows > 1) {
+            $no_rows = ($no_rows - 1) +1;
+        }
+        
+        $form_data = array(
+        'id' => $no_rows,
+        'prenom' => $fname,
+        'nom' => $lname,
+        'email' => $email,
+        'films' => $checkbox
+        );
+        
+//        $csvData = $fname . ',' . $lname . ',' . $email . ',' .  $checkbox;       
+//        if ($file_open){
+//            fwrite($file_open, $csvData . '\n' );
+//            fclose($file_open);
+//        }
+        
+        //fputcsv($file_open, $form_data);
+        
+        file_put_contents('form-to-csv.csv', $form_data, FILE_USE_INCLUDE_PATH || FILE_APPEND);
+        
+//        $error = '<p>Votre inscription a bien été prise en compte</p>';
+//        $fname = '';
+//        $lname = '';
+//        $email = '';
+//        $checkbox = '';
+    }
+}
 
+    
+// 5. Récupérer ses infos dans un custom post accessible depuis le panneau admin. Pas d'envoi de mail.
 
-// 5. Pouvoir extraire ses infos dans un fichier .csv depuis le panneau admin. Requête DB
+// 5.1 Récupérer les données
+$file_read = fopen('../form-to-csv.csv', 'r');
+
+//// 5.2 Afficher les données dans l'onglet du plugin
+function menu_plugin() {
+    
+    
+    //Télécharger ce fichier .csv depuis l'onglet du plugin
+    ?>
+       
+        <a href="file:///C:MAMP/htdocs/Plugin/wp-content/plugins/form-to-csv.csv">
+        <button>Télécharger fichier CSV</button>
+        </a>
+        
+    <?php
+    header('Content-type: text/csv');
+    header('Content-disposition: attachment; filename = form-to-csv.csv');
+}
+
+fclose($file_read);
     
    
