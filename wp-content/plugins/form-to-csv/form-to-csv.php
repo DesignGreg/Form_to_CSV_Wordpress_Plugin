@@ -45,7 +45,6 @@ $fname = sanitize_text_field($_POST['prenom']);
 $lname = sanitize_text_field($_POST['nom']);
 $email = sanitize_email($_POST['email']);
 $checkbox = $_POST['films'];
-$error = '';
 
 // 4.2 Clean_text
 function clean_text($clean) {
@@ -57,6 +56,7 @@ function clean_text($clean) {
 
 // 4.3 Submission form
 if(isset($_POST['submit'])) {
+    $success = true;
     
     if(empty($_POST['prenom']) OR empty($_POST['nom']) OR empty($_POST['email'])) {
         $error = '<p>Veuillez réessayer</p>';
@@ -66,26 +66,28 @@ if(isset($_POST['submit'])) {
         $email = clean_text($_POST['email']);
         }
         
-        if($error == '') {
+        if($error == '' && $success = true) {
+            
             // Ecriture dans fichier csv
-            $file_open = fopen('../form-to-csv.csv', 'a');
-            $no_rows = count(file('../form-to-csv.csv')); 
-//            if ($no_rows > 1) {
-//                $no_rows = ($no_rows - 1) +1;
-//            } 
+            $file_open = fopen('C:\Users\huygh\Desktop\form-to-csv.csv', 'a');
+            $index = count(file('C:\Users\huygh\Desktop\form-to-csv.csv')); 
+            if ($index > 1) {
+                $index = ($index - 1) +1;
+            } 
             $form_data = array(
-//            'id' => $no_rows,
+            'id' => $index,
             'prenom' => $fname,
             'nom' => $lname,
             'email' => $email,
             'films' => $checkbox
         );
             fputcsv($file_open, $form_data);
-            $error = '<p>Votre inscription a bien été prise en compte</p>';
             $fname = '';
             $lname = '';
             $email = '';
             $checkbox = '';
+            header( 'Location: index.php' );
+            exit();
         }    
         
 //    file_put_contents('form-to-csv.csv', $form_data, FILE_USE_INCLUDE_PATH || FILE_APPEND);    
@@ -96,25 +98,25 @@ if(isset($_POST['submit'])) {
 // 5. Récupérer ses infos dans un custom post accessible depuis le panneau admin. Pas d'envoi de mail.
 
 // 5.1 Récupérer et  Afficher les données dans l'onglet du plugin
-function ftc_menu_plugin() {
-    
-    $row = 1;
-    
-    if (($file_read = fopen('../form-to-csv.csv', 'r')) !== FALSE) {
-        while (($data = fgetcsv($file_read, 1000, ',')) !== FALSE) {
-            $num = count($data);
-            echo "<p> $num champs à la ligne $row: <br /></p>\n";
-            $row++;
-                for ($c=0; $c < $num; $c++) {
-                    echo $data[$c] . "br />\n";
-                }
-
-        }
-    }
-    fclose($file_read);
-}
-
-add_action('admin_menu', 'ftc_menu_plugin');
+//function ftc_menu_plugin() {
+//    
+//    $row = 1;
+//    
+//    if (($file_read = fopen('../form-to-csv.csv', 'r')) !== FALSE) {
+//        while (($data = fgetcsv($file_read, 1000, ',')) !== FALSE) {
+//            $num = count($data);
+//            echo "<p> $num champs à la ligne $row: <br /></p>\n";
+//            $row++;
+//                for ($c=0; $c < $num; $c++) {
+//                    echo $data[$c] . "br />\n";
+//                }
+//
+//        }
+//    }
+//    fclose($file_read);
+//}
+//
+//add_action('admin_menu', 'ftc_menu_plugin');
     
     // 5.3 Télécharger ce fichier .csv depuis l'onglet du plugin
     ?>
