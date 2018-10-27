@@ -37,7 +37,7 @@ $error = '';
 $fname = sanitize_text_field($_POST['prenom']);
 $lname = sanitize_text_field($_POST['nom']);
 $email = sanitize_email($_POST['email']);
-$checkbox = implode(" / ", $_POST['films']);
+$checkbox = implode(" / ", (array)$_POST['films']);
 
 // 3.2 Clean_text
 function clean_text($clean) {
