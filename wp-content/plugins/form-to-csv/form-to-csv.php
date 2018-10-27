@@ -13,6 +13,14 @@ function ftc_shortcode() {
 
 add_shortcode( 'form_csv', 'ftc_shortcode' );
 
+// 1.1 CSS
+function ftc_style() {
+    wp_register_style('stylesheet', plugins_url('form-to-csv.css', __FILE__));
+    wp_enqueue_style('stylesheet');
+}
+
+add_action('admin_init', 'ftc_style');
+
 
 // 2. Onglet plugin dans panneau admin pour voir et télécharger les données collectées
 function ftc_menu_item() {
@@ -26,7 +34,6 @@ function ftc_menu_item() {
         21
     );
 }
-
 add_action('admin_menu', 'ftc_menu_item');
 
 
@@ -90,33 +97,26 @@ if(isset($_POST['submit'])) {
 
 function ftc_menu_plugin() {
     
-    $row = 1;
-    
+    echo "<html><body><table>\n\n";
     if (($file_read = fopen('C:\Users\huygh\Desktop\form-to-csv.csv', 'r')) !== FALSE) {
-        while (($data = fgetcsv($file_read, 1000, ',')) !== FALSE) {
-            $num = count($data);
-            echo "<p> $num champs à la ligne $row: <br /></p>\n";
-            $row++;
-                for ($c=0; $c < $num; $c++) {
-                    echo $data[$c] . "br />\n";
-                }
-
+        while (($data = fgetcsv($file_read)) !== FALSE) {
+            echo "<tr>";
+            foreach ($data as $cell) {
+                    echo "<td>" . htmlspecialchars($cell) . "</td>";
+            }
+            echo "</tr>\n";
         }
     }
     fclose($file_read);
-}
-
-add_action('admin_menu', 'ftc_menu_plugin');
+    echo "\n</table></body></html>";
     
-// 4.2 Télécharger ce fichier .csv depuis l'onglet du plugin
+    // 4.2 Télécharger ce fichier .csv depuis l'onglet du plugin
+
     ?>
+    
+    <a href="data:text/csv;charset=utf-8,'+escape(csv)+'" download="form-to-csv.csv">
+        <button  class="button__csv">Télécharger fichier CSV</button>
+    </a>
 
-<a href="data:text/csv;charset=utf-8,'+escape(csv)+'" download="form-to-csv.csv">
-    <button>Télécharger fichier CSV</button>
-</a>
-
-<!--
-<a href="file:///C:MAMP/htdocs/Plugin/wp-content/plugins/form-to-csv.csv">
-    <button>Télécharger fichier CSV</button>
-</a>
--->
+<?php }
+    
