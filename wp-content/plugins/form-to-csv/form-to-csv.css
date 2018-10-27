@@ -15,3 +15,11 @@ td {
     margin-top: 10px;
     padding: 5px;
 }
+
+.button__csv:hover {
+    font-weight: bold;
+}
+
+.button__csv:active {
+    box-shadow: 2px 2px gray;
+}

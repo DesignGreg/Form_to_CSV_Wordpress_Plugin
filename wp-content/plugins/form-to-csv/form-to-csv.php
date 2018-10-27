@@ -97,12 +97,15 @@ if(isset($_POST['submit'])) {
 
 function ftc_menu_plugin() {
     
+    $counter = 0;
+    
     echo "<html><body><table>\n\n";
     if (($file_read = fopen('C:\Users\huygh\Desktop\form-to-csv.csv', 'r')) !== FALSE) {
-        while (($data = fgetcsv($file_read)) !== FALSE) {
+        while (($data = fgetcsv($file_read)) !== FALSE && $counter < 20) {
             echo "<tr>";
+            $counter++;
             foreach ($data as $cell) {
-                    echo "<td>" . htmlspecialchars($cell) . "</td>";
+                    echo "<td>" . $cell . "</td>";
             }
             echo "</tr>\n";
         }
