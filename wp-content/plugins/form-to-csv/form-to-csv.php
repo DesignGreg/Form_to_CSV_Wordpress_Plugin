@@ -128,29 +128,17 @@ function ftc_menu_plugin() {
     // 4.2 Télécharger ce fichier .csv depuis l'onglet du plugin
 
     ?>
-    <div>
-        <a href="C:\Users\huygh\Desktop\form-to-csv.csv" download="form-to-csv.csv">
+        <a href="download.php" target="blank">
             <button class="button__csv">Télécharger fichier CSV</button>
         </a>
-    </div>
+        
+        <a href="delete.php" target="blank">
+            <button class="button__csv button__csv--delete">Supprimer données</button> 
+        </a>
 <?php 
-
-    ftc_erase_data();
 
 }
 
-function ftc_erase_data() {
     
-    if(isset($_GET['delete'])) {
-        $delete_file = $_GET['C:\Users\huygh\Desktop\form-to-csv.csv'];
-        unlink("$delete_file");
-    }
-    
-    ?>
-    <div>
-    <a href="index.php?delete=C:\Users\huygh\Desktop\form-to-csv.csv">
-            <button class="button__csv button__csv--delete">Supprimer données</button> 
-    </a>
-    </div>
-<?php }
+ 
     
