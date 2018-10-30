@@ -97,6 +97,19 @@ if(isset($_POST['submit'])) {
 
 function ftc_menu_plugin() {
     
+//    if (isset($_GET['action']) && $_GET['action'] == 'download') {
+//        header('Location: C:\Users\huygh\Desktop\form-to-csv.csv');
+//        header('Content-Disposition: attachment; filename="form-to-csv.csv"');
+//        header("Content-Type: application/force-download");
+//        header("Content-Transfer-Encoding: Binary");
+//        header("Pragma: no-cache");
+//        header("Expires: 0");
+//
+//        readfile('form-to-csv.csv');
+//        
+//        echo "toto";
+//    }
+    
     $counter = 0;
     
     echo "<html><body><table>\n\n";
@@ -128,7 +141,7 @@ function ftc_menu_plugin() {
     // 4.2 Télécharger ce fichier .csv depuis l'onglet du plugin
 
     ?>
-        <a href="download.php" target="blank">
+        <a href="/Plugin/wp-content/plugins/form-to-csv/download.php" target="_blank">
             <button class="button__csv">Télécharger fichier CSV</button>
         </a>
         
