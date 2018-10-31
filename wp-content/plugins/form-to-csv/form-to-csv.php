@@ -150,7 +150,7 @@ function ftc_menu_plugin() {
             <button class="button__csv">Télécharger fichier CSV</button>
         </a>
         
-        <a href="delete.php" target="blank">
+        <a href="/Plugin/wp-content/plugins/form-to-csv/delete.php" target="blank">
             <button class="button__csv button__csv--delete">Supprimer données</button> 
         </a>
 <?php 
