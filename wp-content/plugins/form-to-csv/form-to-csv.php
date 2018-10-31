@@ -38,59 +38,64 @@ add_action('admin_menu', 'ftc_menu_item');
 
 
 // 3. Ecrire les données dans un fichier
+function ftc_form_html() {
+    
 
-// 3.1 Variables
-$error = '';
-$fname = sanitize_text_field($_POST['prenom']);
-$lname = sanitize_text_field($_POST['nom']);
-$email = sanitize_email($_POST['email']);
-$checkbox = implode(" / ", (array)$_POST['films']);
 
-// 3.2 Clean_text
-function clean_text($clean) {
-    $trimmed = trim($clean);
-    $stripped = stripslashes($clean);
-    $special = htmlspecialchars($clean);
-    return $clean;
+    // 3.1 Variables
+    $error = '';
+    $fname = sanitize_text_field($_POST['prenom']);
+    $lname = sanitize_text_field($_POST['nom']);
+    $email = sanitize_email($_POST['email']);
+    $checkbox = implode(" / ", (array)$_POST['films']);
+
+    // 3.2 Clean_text
+    function clean_text($clean) {
+        $trimmed = trim($clean);
+        $stripped = stripslashes($clean);
+        $special = htmlspecialchars($clean);
+        return $clean;
+    }
+
+    // 3.3 Submission form
+    if(isset($_POST['submit'])) {
+        $success = true;
+
+        if(empty($_POST['prenom']) OR empty($_POST['nom']) OR empty($_POST['email'])) {
+            $error = '<p>Veuillez réessayer</p>';
+        } else {
+            $fname = clean_text($_POST['prenom']);
+            $lname = clean_text($_POST['nom']);
+            $email = clean_text($_POST['email']);
+            }
+
+        if($error == '' && $success = true) {
+
+            // Ecriture dans fichier csv
+            $file_open = fopen('C:\Users\huygh\Desktop\form-to-csv.csv', 'a');
+            $index = count(file('C:\Users\huygh\Desktop\form-to-csv.csv')); 
+            if ($index == 0) {
+                $index = $index +1;
+            } else if ($index > 0) {
+                $index = $index +1;
+            }
+
+            $form_data = array(
+            'id' => $index,
+            'prenom' => $fname,
+            'nom' => $lname,
+            'email' => $email,
+            'films' => $checkbox
+        );
+            fputcsv($file_open, $form_data);
+            header( 'Location: index.php' );
+            exit();
+        }           
+    }
+
 }
 
-// 3.3 Submission form
-if(isset($_POST['submit'])) {
-    $success = true;
-    
-    if(empty($_POST['prenom']) OR empty($_POST['nom']) OR empty($_POST['email'])) {
-        $error = '<p>Veuillez réessayer</p>';
-    } else {
-        $fname = clean_text($_POST['prenom']);
-        $lname = clean_text($_POST['nom']);
-        $email = clean_text($_POST['email']);
-        }
-        
-    if($error == '' && $success = true) {
-            
-        // Ecriture dans fichier csv
-        $file_open = fopen('C:\Users\huygh\Desktop\form-to-csv.csv', 'a');
-        $index = count(file('C:\Users\huygh\Desktop\form-to-csv.csv')); 
-        if ($index == 0) {
-            $index = $index +1;
-        } else if ($index > 0) {
-            $index = $index +1;
-        }
-        
-        $form_data = array(
-        'id' => $index,
-        'prenom' => $fname,
-        'nom' => $lname,
-        'email' => $email,
-        'films' => $checkbox
-    );
-        fputcsv($file_open, $form_data);
-        header( 'Location: index.php' );
-        exit();
-    }           
-}
-
-    
+add_action('wp_loaded', 'ftc_form_html');
 // 4. Récupérer ses infos dans un custom post accessible depuis le panneau admin. Pas d'envoi de mail.
 
 // 4.1 Récupérer et  Afficher les données dans l'onglet du plugin
