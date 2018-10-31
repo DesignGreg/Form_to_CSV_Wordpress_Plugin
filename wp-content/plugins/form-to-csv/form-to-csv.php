@@ -115,23 +115,24 @@ function ftc_menu_plugin() {
 //        echo "toto";
 //    }
     
-    $counter = 0;
-    
-    echo "<html><body><table>\n\n";
-    
-    // Titres du tableau
-    echo "<thead>";
-    echo "<tr class=\"titles\">";
-    echo "<th>ID</th>";
-    echo "<th>Prénom</th>";
-    echo "<th>Nom</th>";
-    echo "<th>Email</th>";
-    echo "<th>Sélection</th>";
-    echo "</tr>\n";
-    echo "</thead>";
-    
     $file_location = 'C:\Users\huygh\Desktop\form-to-csv.csv';
     if (file_exists($file_location)) {
+        
+        $counter = 0;
+
+        echo "<html><body><table>\n\n";
+
+        // Titres du tableau
+        echo "<thead>";
+        echo "<tr class=\"titles\">";
+        echo "<th>ID</th>";
+        echo "<th>Prénom</th>";
+        echo "<th>Nom</th>";
+        echo "<th>Email</th>";
+        echo "<th>Sélection</th>";
+        echo "</tr>\n";
+        echo "</thead>";
+        
         
         if (($file_read = fopen('C:\Users\huygh\Desktop\form-to-csv.csv', 'r')) !== FALSE) {
             while (($data = fgetcsv($file_read)) !== FALSE && $counter < 20) {
@@ -158,6 +159,10 @@ function ftc_menu_plugin() {
         </a>
         <?php 
 
+    } else {
+        echo "<div class=\"no-csv\">";
+        echo stripslashes("<p>Aucune inscription n\'a pour l\'instant été enregistrée.</p>");
+        echo "</div>";
     }
 }
 

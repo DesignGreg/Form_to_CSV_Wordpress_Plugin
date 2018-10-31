@@ -36,3 +36,7 @@ td {
 .float_left {
     float: left;
 }
+
+.no-csv {
+    padding-top: 20px;
+}
