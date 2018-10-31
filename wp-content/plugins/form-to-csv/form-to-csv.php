@@ -130,31 +130,35 @@ function ftc_menu_plugin() {
     echo "</tr>\n";
     echo "</thead>";
     
-    if (($file_read = fopen('C:\Users\huygh\Desktop\form-to-csv.csv', 'r')) !== FALSE) {
-        while (($data = fgetcsv($file_read)) !== FALSE && $counter < 20) {
-            echo "<tr>";
-            $counter++;
-            foreach ($data as $cell) {
-                    echo "<td>" . $cell . "</td>";
+    $file_location = 'C:\Users\huygh\Desktop\form-to-csv.csv';
+    if (file_exists($file_location)) {
+        
+        if (($file_read = fopen('C:\Users\huygh\Desktop\form-to-csv.csv', 'r')) !== FALSE) {
+            while (($data = fgetcsv($file_read)) !== FALSE && $counter < 20) {
+                echo "<tr>";
+                $counter++;
+                foreach ($data as $cell) {
+                    echo stripslashes( "<td>" . $cell . "</td>" );
+                }
+                echo "</tr>\n";
             }
-            echo "</tr>\n";
         }
-    }
-    fclose($file_read);
-    echo "\n</table></body></html>";
-    
-    // 4.2 Télécharger ce fichier .csv depuis l'onglet du plugin
+        fclose($file_read);
+        echo "\n</table></body></html>";
 
-    ?>
+        // 4.2 Télécharger ce fichier .csv depuis l'onglet du plugin
+
+        ?>
         <a href="/Plugin/wp-content/plugins/form-to-csv/download.php" target="_blank">
             <button class="button__csv">Télécharger fichier CSV</button>
         </a>
-        
+
         <a href="/Plugin/wp-content/plugins/form-to-csv/delete.php" target="blank">
             <button class="button__csv button__csv--delete">Supprimer données</button> 
         </a>
-<?php 
+        <?php 
 
+    }
 }
 
     
